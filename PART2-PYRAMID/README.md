@@ -2,6 +2,6 @@
 
 > * (i) Ready
 > * (ii) Almost Ready, Height random generated value needs to by implemented
-> * (iii) Maybe i know a way
+> * (iii) Not a single clue how can i make this camera
 > * (iv) Still no idea
-> * (v) I think is ready. A second opinion could be helpful
+> * (v) Works only when mouse movement is enabled.

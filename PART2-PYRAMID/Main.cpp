@@ -120,6 +120,12 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 }
 
 
+GLfloat doubleRan() {
+
+	return ((GLfloat)rand()) / ((GLfloat)RAND_MAX);
+
+}
+
 int main( void )
 {
 	// Initialise GLFW
@@ -158,14 +164,14 @@ int main( void )
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     // Hide the mouse and enable unlimited mouvement
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // Set the mouse at the center of the screen
     glfwPollEvents();
-    glfwSetCursorPos(window, 800/2, 800/2);
+    //glfwSetCursorPos(window, 800/2, 800/2);
 
-	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	// Black background
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -173,7 +179,7 @@ int main( void )
 	glDepthFunc(GL_LESS); 
 
 	// Cull triangles which normal is not towards the camera
-	// glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -185,39 +191,57 @@ int main( void )
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
+	
+	
+	srand(time(NULL));
+
+	float height = 2.0 + (rand() % 9) + doubleRan();
+	while (height > 10.0)
+	{
+
+		float height = 2.0 + (rand() % 9);
+
+	}
 
 	// Our vertices. Tree consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
 	// A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
 	static const GLfloat g_vertex_buffer_data[] = {
 	//-------------------- pyramid base ----------------------
-		-2.5f,-2.5f,0.0f,
-		 2.5f,-2.5f,0.0f,
-		-2.5f, 2.5f,0.0f,
+			-2.5f,-2.5f,0.0f,
+			 2.5f,-2.5f,0.0f,
+			-2.5f, 2.5f,0.0f,
 
-		 2.5f,-2.5f,0.0f,
-		 2.5f, 2.5f,0.0f,
-		-2.5f, 2.5f,0.0f,
+			 2.5f,-2.5f,0.0f,
+			 2.5f, 2.5f,0.0f,
+			-2.5f, 2.5f,0.0f,
 	//-------------------- pyramid faces ----------------------
-		-2.5f,-2.5f,0.0f,
-		 2.5f,-2.5f,0.0f,	// 1st front triangle
-		 0.0f, 0.0f,2.0f,
+			-2.5f,-2.5f,0.0f,
+			 2.5f,-2.5f,0.0f,	// 1st front triangle
+			 0.0f, 0.0f,height,
 
-		 2.5f,-2.5f,0.0f,
-		 2.5f, 2.5f,0.0f,	// 2nd right triangle
-		 0.0f, 0.0f,2.0f,
+			 2.5f,-2.5f,0.0f,
+		 	 2.5f, 2.5f,0.0f,	// 2nd right triangle
+			 0.0f, 0.0f,height,
 
-		-2.5f, 2.5f,0.0f,
-		 2.5f, 2.5f,0.0f,	// 3nd back triangle
-		 0.0f, 0.0f,2.0f,
+			-2.5f, 2.5f,0.0f,
+			 2.5f, 2.5f,0.0f,	// 3nd back triangle
+			 0.0f, 0.0f,height,
 
-		-2.5f,-2.5f,0.0f,
-		-2.5f, 2.5f,0.0f,	// 4th left triangle
-		 0.0f, 0.0f,2.0f,
+			-2.5f,-2.5f,0.0f,
+			-2.5f, 2.5f,0.0f,	// 4th left triangle
+			 0.0f, 0.0f,height,
 
 	};
 
+	static GLfloat g_color_buffer_data[54] = {0.0f};
+
+	for (int i = 0; i < 54; i++)
+	{
+		g_color_buffer_data[i] = doubleRan();
+	}
+
 	// One color for each vertex. They were generated randomly.
-	static const GLfloat g_color_buffer_data[] = {
+	/*static const GLfloat g_color_buffer_data[] = {
 		
 		0.583f,  0.771f,  0.014f,
 		0.609f,  0.115f,  0.436f,
@@ -243,7 +267,7 @@ int main( void )
 		0.971f,  0.572f,  0.833f,
 		0.140f,  0.616f,  0.489f,
 		
-	};
+	};*/
 
 
 	GLuint vertexbuffer;

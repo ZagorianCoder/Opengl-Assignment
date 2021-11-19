@@ -7,7 +7,6 @@
 #include <fstream>
 #include <algorithm>
 #include <sstream>
-#include <Windows.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -119,12 +118,19 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 	return ProgramID;
 }
 
+void keyCallback(GLFWwindow* window, int key, int scancodem, int action, int mods);
 
-GLfloat doubleRan() {
+GLfloat doubleRan() 
+{
 
 	return ((GLfloat)rand()) / ((GLfloat)RAND_MAX);
 
 }
+
+GLuint vertexbuffer;
+GLuint colorbuffer;
+GLuint programID;
+GLuint VertexArrayID;
 
 int main( void )
 {
@@ -144,7 +150,11 @@ int main( void )
 
 	// Open a window and create its OpenGL context
 	window = glfwCreateWindow( 800, 800, "Pyramid", NULL, NULL);
-	if( window == NULL ){
+
+	glfwSetKeyCallback(window, keyCallback);
+
+	if( window == NULL )
+	{
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		getchar();
 		glfwTerminate();
@@ -154,21 +164,19 @@ int main( void )
 
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
+	if (glewInit() != GLEW_OK) 
+	{
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		getchar();
 		glfwTerminate();
 		return -1;
 	}
 
-	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-    // Hide the mouse and enable unlimited mouvement
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GL_TRUE);
     
     // Set the mouse at the center of the screen
     glfwPollEvents();
-    //glfwSetCursorPos(window, 800/2, 800/2);
 
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -178,23 +186,19 @@ int main( void )
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS); 
 
-	// Cull triangles which normal is not towards the camera
-	//glEnable(GL_CULL_FACE);
-
-	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders( "TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader" );
+	 programID = LoadShaders( "TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader" );
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	
 	
+	//random generated height
 	srand(time(NULL));
-
 	float height = 2.0 + (rand() % 9) + doubleRan();
 	while (height > 10.0)
 	{
@@ -202,10 +206,10 @@ int main( void )
 		float height = 2.0 + (rand() % 9);
 
 	}
+	
 
-	// Our vertices. Tree consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
-	// A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
-	static const GLfloat g_vertex_buffer_data[] = {
+	float scalingFactor = 1.0f;
+	GLfloat g_vertex_buffer_data[] = {
 	//-------------------- pyramid base ----------------------
 			-2.5f,-2.5f,0.0f,
 			 2.5f,-2.5f,0.0f,
@@ -235,53 +239,25 @@ int main( void )
 
 	static GLfloat g_color_buffer_data[54] = {0.0f};
 
+	// One color for each vertex. They were generated randomly.
 	for (int i = 0; i < 54; i++)
 	{
 		g_color_buffer_data[i] = doubleRan();
 	}
 
-	// One color for each vertex. They were generated randomly.
-	/*static const GLfloat g_color_buffer_data[] = {
-		
-		0.583f,  0.771f,  0.014f,
-		0.609f,  0.115f,  0.436f,
-		0.327f,  0.483f,  0.844f,
-
-		0.822f,  0.569f,  0.201f,
-		0.435f,  0.602f,  0.223f,
-		0.310f,  0.747f,  0.185f,
-		
-		0.597f,  0.770f,  0.761f,
-		0.559f,  0.436f,  0.730f,
-		0.359f,  0.583f,  0.152f,
-		
-		0.483f,  0.596f,  0.789f,
-		0.559f,  0.861f,  0.639f,
-		0.195f,  0.548f,  0.859f,
-		
-		0.014f,  0.184f,  0.576f,
-		0.771f,  0.328f,  0.970f,
-		0.406f,  0.615f,  0.116f,
-		
-		0.676f,  0.977f,  0.133f,
-		0.971f,  0.572f,  0.833f,
-		0.140f,  0.616f,  0.489f,
-		
-	};*/
-
-
-	GLuint vertexbuffer;
+	
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-	GLuint colorbuffer;
 	glGenBuffers(1, &colorbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 
 
-	do{
+
+	do
+	{
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -295,12 +271,31 @@ int main( void )
 		glm::mat4 ViewMatrix = getViewMatrix();
 		
 
-		glm::mat4 ModelMatrix = glm::mat4(1.0);
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glm::mat4 ModelMatrix (1.0f);
 
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		{
+			
+			scalingFactor += 0.0005f ;
+		
+		}
+		else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+		{
+			
+			scalingFactor -= 0.0005f ;
+		
+		}
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scalingFactor));
+		
+
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		
+			
+
+		
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 				// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -328,7 +323,7 @@ int main( void )
 
 
 		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, 6*3); // 12*3 indices starting at 0 -> 12 triangles
+		glDrawArrays(GL_TRIANGLES, 0, 6*3);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -337,18 +332,28 @@ int main( void )
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-	} // Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_Q) != GLFW_PRESS || (GetKeyState(VK_CAPITAL) & 0x0001) == 0 && glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) != GLFW_PRESS);
+	}
+	while (true);
 
-	// Cleanup VBO and shader
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &colorbuffer);
-	glDeleteProgram(programID);
-	glDeleteVertexArrays(1, &VertexArrayID);
-
-	// Close OpenGL window and terminate GLFW
-	glfwTerminate();
-
-	return 0;
 }
 
+void keyCallback(GLFWwindow* window, int key, int scancodem, int action, int mods)
+{
+
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS && mods == 48)
+	{
+		
+		// Cleanup VBO and shader
+		glDeleteBuffers(1, &vertexbuffer);
+		glDeleteBuffers(1, &colorbuffer);
+		glDeleteProgram(programID);
+		glDeleteVertexArrays(1, &VertexArrayID);
+
+		// Close OpenGL window and terminate GLFW
+		glfwTerminate();
+
+		exit(0);
+
+	}
+	
+}

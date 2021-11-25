@@ -149,7 +149,7 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 800, 800, "Pyramid", NULL, NULL);
+	window = glfwCreateWindow( 800, 800, "Πυραμίδα", NULL, NULL);
 
 	glfwSetKeyCallback(window, keyCallback);
 
@@ -209,6 +209,7 @@ int main( void )
 	
 
 	float scalingFactor = 1.0f;
+
 	GLfloat g_vertex_buffer_data[] = {
 	//-------------------- pyramid base ----------------------
 			-2.5f,-2.5f,0.0f,

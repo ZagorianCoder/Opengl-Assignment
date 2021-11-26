@@ -76,13 +76,13 @@ void computeMatricesFromInputs(){
 	}
 
 	// Projection matrix : 30° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	ProjectionMatrix = glm::perspective(glm::radians(30.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+	ProjectionMatrix = glm::perspective(glm::radians(100.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
 	ViewMatrix = glm::lookAt(
 
 		camPos, // Camera is at the calculated position, in World Space
 		glm::vec3(0.0f, 0.0f, 0.0f), // and looks at the origin
-		glm::vec3(0.0f, 0.0f, 1.0f)  // Up vector    
+		glm::vec3(0.0f, 1.0f, 0.0f)  // Up vector    
 
 	);
 	

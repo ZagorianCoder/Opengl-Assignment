@@ -20,7 +20,7 @@ glm::mat4 getProjectionMatrix(){
 }
 
 glm::mat4 Model = glm::mat4(1.0f);
-glm::vec3 camPos = glm::vec3(10.0f, 10.0f, 30.f);
+glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 30.f);
 
 
 void computeMatricesFromInputs(){

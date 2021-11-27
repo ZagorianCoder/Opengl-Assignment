@@ -303,35 +303,54 @@ int main(void)
 	// Load the texture
 
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("sun.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data[2];
+	data[0] = stbi_load("sun.jpg", &width, &height, &nrChannels, 0);
+	data[1] = stbi_load("planet.jpg", &width, &height, &nrChannels, 0);
 
-	if (data)
+	for (int i = 0; i < 2; i++)
 	{
 
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
+		if (data[i])
+		{
+
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+
 	}
 
 	GLuint textureID;
 	glGenTextures(1, &textureID);
+	
 
 	// "Bind" the newly created texture : all future texture functions will modify this texture
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	// Give the image to OpenGL
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data[0]);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+	
+	GLuint textureID2;
+	glGenTextures(1, &textureID2);
+	glBindTexture(GL_TEXTURE_2D, textureID2);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data[1]);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	GLuint TextureID2 = glGetUniformLocation(programID, "myTextureSampler");
 
 	// Read our .obj file
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> uvs;
 	bool res = loadOBJ("sun.obj", vertices, uvs, normals);
+	std::vector<glm::vec3> vertices2;
+	std::vector<glm::vec3> normals2;
+	std::vector<glm::vec2> uvs2;
+	res = loadOBJ("planet.obj", vertices2, uvs2, normals2);
 
 	// Load it into a VBO
 
@@ -339,11 +358,23 @@ int main(void)
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	
+	GLuint vertexbuffer2;
+	glGenBuffers(1, &vertexbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, vertices2.size() * sizeof(glm::vec3), &vertices2[0], GL_STATIC_DRAW);
 
 	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	
+	GLuint uvbuffer2;
+	glGenBuffers(1, &uvbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, uvs2.size() * sizeof(glm::vec2), &uvs2[0], GL_STATIC_DRAW);
+
+	glm::vec3 modelsPositions[] = { glm::vec3(0.0f,0.0f,0.0f),glm::vec3(40.0f,0.0f,-40.0f) };
 
 	do {
 
@@ -369,6 +400,7 @@ int main(void)
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		// Set our "myTextureSampler" sampler to use Texture Unit 0
 		glUniform1i(TextureID, 0);
+		
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -394,8 +426,49 @@ int main(void)
 			(void*)0                          // array buffer offset
 		);
 
+		ModelMatrix = glm::translate(glm::mat4(1.0f), modelsPositions[0]);
+		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		// Draw the triangle !
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textureID2);
+		// Set our "myTextureSampler" sampler to use Texture Unit 0
+		glUniform1i(TextureID2, 1);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+		glVertexAttribPointer(
+			0,                  // attribute
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// 2nd attribute buffer : UVs
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
+		glVertexAttribPointer(
+			1,                                // attribute
+			2,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
+
+		ModelMatrix = glm::translate(glm::mat4(1.0f), modelsPositions[1]);
+		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		// Draw the triangle !
+		glDrawArrays(GL_TRIANGLES, 0, vertices2.size());
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);

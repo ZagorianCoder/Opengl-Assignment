@@ -374,7 +374,7 @@ int main(void)
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
 	glBufferData(GL_ARRAY_BUFFER, uvs2.size() * sizeof(glm::vec2), &uvs2[0], GL_STATIC_DRAW);
 
-	glm::vec3 modelsPositions[] = { glm::vec3(0.0f,0.0f,0.0f),glm::vec3(40.0f,0.0f,-40.0f) };
+	glm::vec3 modelsPositions[] = { glm::vec3(0.0f,0.0f,0.0f),glm::vec3(30.0f,0.0f,-20.0f) };
 
 	do {
 
@@ -463,8 +463,10 @@ int main(void)
 			0,                                // stride
 			(void*)0                          // array buffer offset
 		);
-
-		ModelMatrix = glm::translate(glm::mat4(1.0f), modelsPositions[1]);
+		
+		ModelMatrix = glm::translate(glm::mat4(1.0f), modelsPositions[0]);
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(20.0f * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+		ModelMatrix = glm::translate(ModelMatrix, modelsPositions[1]);
 		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		// Draw the triangle !

@@ -1,4 +1,4 @@
-﻿// Include standard headers
+// Include standard headers
 #define _CRT_SECURE_NO_WARNINGS
 
 #define STB_IMAGE_IMPLEMENTATION

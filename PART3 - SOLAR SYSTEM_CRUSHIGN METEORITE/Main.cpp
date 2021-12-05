@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 #include <stdio.h>
@@ -239,6 +240,26 @@ bool loadOBJ(
 	return true;
 }
 
+void keyCallback(GLFWwindow* window, int key, int scancodem, int action, int mods);
+
+GLuint programID;
+GLuint VertexArrayID;
+GLuint textureID;
+GLuint TextureID;
+GLuint textureID2;
+GLuint TextureID2;
+GLuint textureID3;
+GLuint TextureID3;
+GLuint textureID4;
+GLuint TextureID4;
+GLuint vertexbuffer;
+GLuint uvbuffer;
+GLuint vertexbuffer2;
+GLuint uvbuffer2;
+GLuint vertexbuffer3;
+GLuint uvbuffer3;
+GLuint vertexbuffer4;
+GLuint uvbuffer4;
 
 
 int main(void)
@@ -259,6 +280,9 @@ int main(void)
 
 	// Open a window and create its OpenGL context
 	window = glfwCreateWindow(800, 800, "Ηλιακό Σύστημα", NULL, NULL);
+
+	glfwSetKeyCallback(window, keyCallback);
+
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
 		getchar();
@@ -276,10 +300,11 @@ int main(void)
 		return -1;
 	}
 
-	// Ensure we can capture the escape key being pressed below
+	// Ensure we can capture the keys being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GL_TRUE);
 
-	// Dark blue background
+	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Enable depth test
@@ -290,12 +315,11 @@ int main(void)
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders("TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader");
+	programID = LoadShaders("TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader");
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -303,9 +327,12 @@ int main(void)
 	// Load the texture
 
 	int width, height, nrChannels;
-	unsigned char* data[2];
+	unsigned char* data[3];
 	data[0] = stbi_load("sun.jpg", &width, &height, &nrChannels, 0);
 	data[1] = stbi_load("planet.jpg", &width, &height, &nrChannels, 0);
+	data[2] = stbi_load("meteor.jpg", &width, &height, &nrChannels, 0);
+	
+	
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -321,7 +348,6 @@ int main(void)
 
 	}
 
-	GLuint textureID;
 	glGenTextures(1, &textureID);
 	
 
@@ -333,48 +359,74 @@ int main(void)
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+	TextureID = glGetUniformLocation(programID, "myTextureSampler");
 	
-	GLuint textureID2;
 	glGenTextures(1, &textureID2);
 	glBindTexture(GL_TEXTURE_2D, textureID2);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data[1]);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	GLuint TextureID2 = glGetUniformLocation(programID, "myTextureSampler");
+	TextureID2 = glGetUniformLocation(programID, "myTextureSampler");
+
+	glGenTextures(1, &textureID3);
+	glBindTexture(GL_TEXTURE_2D, textureID3);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data[2]);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	TextureID3 = glGetUniformLocation(programID, "myTextureSampler");
 
 	// Read our .obj file
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> uvs;
 	bool res = loadOBJ("sun.obj", vertices, uvs, normals);
+	
 	std::vector<glm::vec3> vertices2;
 	std::vector<glm::vec3> normals2;
 	std::vector<glm::vec2> uvs2;
 	res = loadOBJ("planet.obj", vertices2, uvs2, normals2);
+	
+	std::vector<glm::vec3> vertices3;
+	std::vector<glm::vec3> normals3;
+	std::vector<glm::vec2> uvs3;
+	res = loadOBJ("meteor.obj", vertices3, uvs3, normals3);
+	
 
 	// Load it into a VBO
 
-	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 	
-	GLuint vertexbuffer2;
-	glGenBuffers(1, &vertexbuffer2);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-	glBufferData(GL_ARRAY_BUFFER, vertices2.size() * sizeof(glm::vec3), &vertices2[0], GL_STATIC_DRAW);
 
-	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 	
-	GLuint uvbuffer2;
+	glGenBuffers(1, &vertexbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, vertices2.size() * sizeof(glm::vec3), &vertices2[0], GL_STATIC_DRAW);
+
 	glGenBuffers(1, &uvbuffer2);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
 	glBufferData(GL_ARRAY_BUFFER, uvs2.size() * sizeof(glm::vec2), &uvs2[0], GL_STATIC_DRAW);
 
-	glm::vec3 modelsPositions[] = { glm::vec3(0.0f,0.0f,0.0f),glm::vec3(30.0f,0.0f,-20.0f) };
+	glGenBuffers(1, &vertexbuffer3);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+	glBufferData(GL_ARRAY_BUFFER, vertices3.size() * sizeof(glm::vec3), &vertices3[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &uvbuffer3);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer3);
+	glBufferData(GL_ARRAY_BUFFER, uvs3.size() * sizeof(glm::vec2), &uvs3[0], GL_STATIC_DRAW);
+
+	glm::vec3 modelsPositions[] = { glm::vec3(0.0f,0.0f,0.0f),glm::vec3(25.0f,0.0f,0.0f) };
+	float increase = 60.0f;
+	bool spacebar_pressed = false;
+	bool drawPlanet = true;
+	bool showDestPlanet = false;
+	glm::mat4 ModelMatrix2(1.0f);
+	bool showExplosion = false;
+	int photoNumber = 1;
+	double activationTime = -1.0;
+	float rotationSpeed = 0.5f;
 
 	do {
 
@@ -396,6 +448,7 @@ int main(void)
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 		// Bind our texture in Texture Unit 0
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		// Set our "myTextureSampler" sampler to use Texture Unit 0
@@ -434,65 +487,265 @@ int main(void)
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
-		
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureID2);
-		// Set our "myTextureSampler" sampler to use Texture Unit 0
-		glUniform1i(TextureID2, 1);
 
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-		glVertexAttribPointer(
-			0,                  // attribute
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
+		if (drawPlanet)
+		{
 
-		// 2nd attribute buffer : UVs
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
-		glVertexAttribPointer(
-			1,                                // attribute
-			2,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
-		
-		ModelMatrix = glm::translate(glm::mat4(1.0f), modelsPositions[0]);
-		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(20.0f * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
-		ModelMatrix = glm::translate(ModelMatrix, modelsPositions[1]);
-		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, vertices2.size());
+			if (!showExplosion)
+			{
 
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, textureID2);
+				glUniform1i(TextureID2, 1);
+
+			}
+			else
+			{
+				string fName;
+				if (photoNumber < 10)
+				{
+					
+					fName = "000";
+
+				}
+				else if(photoNumber < 100)
+				{
+
+					fName = "00";
+
+				}
+				else
+				{
+
+					fName = "0";
+
+				}
+				fName.append(to_string(photoNumber));
+				fName.append(".jpg");
+				int width, height, nrChannels;
+				unsigned char* data;
+				data = stbi_load(fName.c_str(), &width, &height, &nrChannels, 0);
+				if (data)
+				{
+
+				}
+				else
+				{
+					std::cout << "Failed to load texture" << std::endl;
+				}
+				glGenTextures(1, &textureID4);
+				glBindTexture(GL_TEXTURE_2D, textureID4);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				glGenerateMipmap(GL_TEXTURE_2D);
+				TextureID4 = glGetUniformLocation(programID, "myTextureSampler");
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, textureID4);
+				glUniform1i(TextureID4, 1);
+
+			}
+
+			// 1rst attribute buffer : vertices
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+			glVertexAttribPointer(
+				0,                  // attribute
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(void*)0            // array buffer offset
+			);
+
+			// 2nd attribute buffer : UVs
+			glEnableVertexAttribArray(1);
+			glBindBuffer(GL_ARRAY_BUFFER, uvbuffer2);
+			glVertexAttribPointer(
+				1,                                // attribute
+				2,                                // size
+				GL_FLOAT,                         // type
+				GL_FALSE,                         // normalized?
+				0,                                // stride
+				(void*)0                          // array buffer offset
+			);
+
+			if (!showExplosion)
+			{
+
+				ModelMatrix2 = glm::translate(glm::mat4(1.0f), modelsPositions[0]);
+				ModelMatrix2 = glm::rotate(ModelMatrix2, glm::radians(rotationSpeed), glm::vec3(0.0f, 1.0f, 0.0f));
+				ModelMatrix2 = glm::translate(ModelMatrix2, modelsPositions[1]);
+				rotationSpeed += 0.005f;
+				
+
+			}
+
+			MVP = ProjectionMatrix * ViewMatrix * ModelMatrix2;
+			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+			// Draw the triangle !
+			glDrawArrays(GL_TRIANGLES, 0, vertices2.size());
+
+			glDisableVertexAttribArray(0);
+			glDisableVertexAttribArray(1);
+
+		}
+		else if(activationTime > 0)
+		{
+
+			double current_time = glfwGetTime() - activationTime;
+			if (current_time > 10)
+			{
+
+				//printf()
+				drawPlanet = true;
+				activationTime = -1.0;
+
+			}
+
+		}
+
+
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS || spacebar_pressed)
+		{
+
+			spacebar_pressed = true;
+			/**/if (!showExplosion)
+			{
+				
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, textureID3);
+				glUniform1i(TextureID3, 1);
+
+			}
+			else
+			{
+
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, textureID4);
+				glUniform1i(TextureID4, 1);
+
+			}
+			
+
+			// 1rst attribute buffer : vertices
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+			glVertexAttribPointer(
+				0,                  // attribute
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(void*)0            // array buffer offset
+			);
+
+			// 2nd attribute buffer : UVs
+			glEnableVertexAttribArray(1);
+			glBindBuffer(GL_ARRAY_BUFFER, uvbuffer3);
+			glVertexAttribPointer(
+				1,                                // attribute
+				2,                                // size
+				GL_FLOAT,                         // type
+				GL_FALSE,                         // normalized?
+				0,                                // stride
+				(void*)0                          // array buffer offset
+			);
+
+			if (!showExplosion)
+			{
+
+				increase -= 0.005f;
+
+			}
+			glm::vec3 moveonz = glm::vec3(0.0f, 0.0f, increase);
+			ModelMatrix = glm::translate(glm::mat4(1.0f), moveonz);
+			glm::mat4 MVP3 = ProjectionMatrix * ViewMatrix * ModelMatrix;
+			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP3[0][0]);
+			// Draw the triangle !
+			glDrawArrays(GL_TRIANGLES, 0, vertices3.size());
+			glDisableVertexAttribArray(0);
+			glDisableVertexAttribArray(1);
+
+			//d = ((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)^1/2;
+			long double distance = 11.0;
+			if (drawPlanet && showExplosion == false)
+			{
+
+				long double dx = ModelMatrix2[3].x;
+				long double dz = ModelMatrix2[3].z - increase;
+				distance = glm::pow((glm::pow(dx, 2) + glm::pow(dz, 2)), 0.5);
+
+			}
+			
+
+			if (increase <= 0.0f)
+			{
+
+				spacebar_pressed = false;
+				increase = 60.0f;
+
+			}
+			else if (distance <= 10.0)
+			{
+
+				showExplosion = true;
+				activationTime = glfwGetTime();
+				
+			}
+
+		}
+		if (photoNumber < 120 && showExplosion)
+		{
+
+			photoNumber++;
+
+		}
+		else if(showExplosion)
+		{
+
+			spacebar_pressed = false;
+			increase = 60.0f;
+			drawPlanet = false;
+			showExplosion = false;
+			photoNumber = 1;
+			
+			
+		}
 
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-	} // Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
+	}
+	while (true);
 
-	// Cleanup VBO and shader
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &uvbuffer);
-	glDeleteProgram(programID);
-	glDeleteTextures(1, &textureID);
-	glDeleteVertexArrays(1, &VertexArrayID);
+}
 
-	// Close OpenGL window and terminate GLFW
-	glfwTerminate();
+void keyCallback(GLFWwindow* window, int key, int scancodem, int action, int mods)
+{
 
-	return 0;
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS && mods == 48)
+	{
+
+		// Cleanup VBO and shader
+		glDeleteBuffers(1, &vertexbuffer);
+		glDeleteBuffers(1, &uvbuffer);
+		glDeleteBuffers(1, &vertexbuffer2);
+		glDeleteBuffers(1, &uvbuffer2);
+		glDeleteBuffers(1, &vertexbuffer3);
+		glDeleteBuffers(1, &uvbuffer3);
+		glDeleteProgram(programID);
+		glDeleteTextures(1, &textureID);
+		glDeleteTextures(1, &textureID2);
+		glDeleteTextures(1, &textureID3);
+		glDeleteTextures(1, &textureID4);
+		glDeleteVertexArrays(1, &VertexArrayID);
+
+		// Close OpenGL window and terminate GLFW
+		glfwTerminate();
+
+		exit(0);
+
+	}
+
 }
 

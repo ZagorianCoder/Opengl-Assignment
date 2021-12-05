@@ -20,7 +20,7 @@ glm::mat4 getProjectionMatrix(){
 }
 
 glm::mat4 Model = glm::mat4(1.0f);
-glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 30.f);
+glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 60.f);
 
 
 void computeMatricesFromInputs(){
@@ -76,7 +76,7 @@ void computeMatricesFromInputs(){
 	}
 
 	// Projection matrix : 30° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	ProjectionMatrix = glm::perspective(glm::radians(100.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+	ProjectionMatrix = glm::perspective(glm::radians(100.0f), 1.0f , 0.1f, 100.0f);
 	// Camera matrix
 	ViewMatrix = glm::lookAt(
 

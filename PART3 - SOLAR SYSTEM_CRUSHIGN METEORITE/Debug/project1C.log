@@ -1,0 +1,15 @@
+﻿  Main.cpp
+  The contents of <filesystem> are available only with C++17 or later.
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u0397' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03BB' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03B9' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03B1' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03BA' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03CC' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03A3' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03CD' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03C3' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03C4' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03B7' cannot be represented in the current code page (1252)
+E:\GPU\GP\project1C\Main.cpp(282,38): warning C4566: character represented by universal-character-name '\u03BC' cannot be represented in the current code page (1252)
+  project1C.vcxproj -> E:\GPU\GP\project1C\Debug\project1C.exe
